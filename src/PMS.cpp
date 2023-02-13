@@ -135,18 +135,18 @@ void PMS::loop()
           _data->PM_AE_UG_10_0 = makeWord(_payload[10], _payload[11]);
 
           // Total particles
-          uint8_t dataWords = _frameLen/2 -3; // subtract header and checksum
-          if (dataWords >= 12) {
+          
+          if (_frameLen == 2*13+2) {
             _data->PM_TOTALPARTICLES_0_3 = makeWord(_payload[12], _payload[13]);
             _data->PM_TOTALPARTICLES_0_5 = makeWord(_payload[14], _payload[15]);
             _data->PM_TOTALPARTICLES_1_0 = makeWord(_payload[16], _payload[17]);
             _data->PM_TOTALPARTICLES_2_5 = makeWord(_payload[18], _payload[19]);
-            _data->PM_TOTALPARTICLES_5_0 = makeWord(_payload[20], _payload[21]);
-            _data->PM_TOTALPARTICLES_10_0 = makeWord(_payload[22], _payload[23]);
-            _data->hasParticles = true;
+            _data->temperature = makeWord(_payload[20], _payload[21]);
+            _data->humidity = makeWord(_payload[22], _payload[23]);
+
           }
           else {
-            _data->hasParticles = false;
+
           }
         }
         _index = 0;

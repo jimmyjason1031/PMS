@@ -28,9 +28,11 @@ public:
     uint16_t PM_TOTALPARTICLES_0_5;
     uint16_t PM_TOTALPARTICLES_1_0;
     uint16_t PM_TOTALPARTICLES_2_5;
-    uint16_t PM_TOTALPARTICLES_5_0;
-    uint16_t PM_TOTALPARTICLES_10_0;
-    bool hasParticles;
+
+    
+    // Additional data members
+    uint16_t temperature;
+    uint16_t humidity;
   };
 
   PMS(Stream&);
@@ -47,7 +49,7 @@ private:
   enum STATUS { STATUS_WAITING, STATUS_OK };
   enum MODE { MODE_ACTIVE, MODE_PASSIVE };
 
-  uint8_t _payload[24];
+  uint8_t _payload[32];  // Increase payload size to accommodate additional data members
   Stream* _stream;
   DATA* _data;
   STATUS _status;

@@ -1,42 +1,57 @@
+
 #include "PMS.h"
+#include "ArduinoJson.h"
 
 PMS pms(Serial);
 PMS::DATA data;
 
 void setup()
 {
-  Serial.begin(9600);   // GPIO1, GPIO3 (TX/RX pin on ESP-12E Development Board)
-  Serial1.begin(9600);  // GPIO2 (D4 pin on ESP-12E Development Board)
+  // Serial.begin(9600);   // GPIO1, GPIO3 (TX/RX pin on ESP-12E Development Board)
+  Serial.begin(9600);  // GPIO2 (D4 pin on ESP-12E Development Board)
   pms.passiveMode();    // Switch to passive mode
 }
 
 void loop()
 {
-  Serial1.println("Waking up, wait 30 seconds for stable readings...");
+  Serial.println("Wake up, wait 30 seconds for stable readings...");
   pms.wakeUp();
   delay(30000);
 
-  Serial1.println("Send read request...");
+  Serial.println("Send request read...");
   pms.requestRead();
 
-  Serial1.println("Wait max. 1 second for read...");
-  if (pms.readUntil(data))
+  Serial.println("Wait max. 10 seconds for read...");
+  if (pms.readUntil(data, 10000))
   {
-    Serial1.print("PM 1.0 (ug/m3): ");
-    Serial1.println(data.PM_AE_UG_1_0);
+    Serial.println("Data:");
+    
+    StaticJsonDocument<200> doc;
+    doc["action"] = "status";
 
-    Serial1.print("PM 2.5 (ug/m3): ");
-    Serial1.println(data.PM_AE_UG_2_5);
+    JsonObject component = doc.createNestedObject("component");
+    component["temperature"] = data.temperature;
+    component["humidity"] = data.humidity;
+    component["particle0.3um"] = data.PM_TOTALPARTICLES_0_3;
+    component["particle0.5um"] = data.PM_TOTALPARTICLES_0_5;
+    component["particle1.0um"] = data.PM_TOTALPARTICLES_1_0;
+    component["particle2.5um"] = data.PM_TOTALPARTICLES_2_5;
+    component["concentration_PM1.0"] = data.PM_SP_UG_1_0;
+    component["concentration_PM2.5"] = data.PM_SP_UG_2_5;
+    component["concentration_PM10"] = data.PM_SP_UG_10_0;
+    component["concentration_aPM1.0"] = data.PM_AE_UG_1_0;
+    component["concentration_aPM2.5"] = data.PM_AE_UG_2_5;
+    component["concentration_aPM10"] = data.PM_AE_UG_10_0;
 
-    Serial1.print("PM 10.0 (ug/m3): ");
-    Serial1.println(data.PM_AE_UG_10_0);
+    serializeJson(doc, Serial);
+    Serial.println();
   }
   else
   {
-    Serial1.println("No data.");
+    Serial.println("No data.");
   }
 
-  Serial1.println("Going to sleep for 60 seconds.");
+  Serial.println("Going to sleep for 10 seconds.");
   pms.sleep();
-  delay(60000);
+  delay(10000);
 }
